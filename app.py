@@ -1,5 +1,8 @@
 import streamlit as st
 import base64
+from core.audio import speech_to_text, text_to_speech
+import streamlit as st
+
 
 def get_base64_of_bin_file(image_path):
     with open(image_path, "rb") as f:
@@ -134,6 +137,31 @@ Welcome to the anonymous support group and community forum! Here, you can connec
 - Help others by sharing your experience
 - AI moderation ensures a safe and supportive space
 """)
+
+
+st.markdown("## 🎤 Talk with TalkHeal AI")
+
+audio = st.file_uploader("Upload / record your voice (wav/mp3/ogg)", type=["wav", "mp3", "ogg"])
+
+if audio is not None:
+    st.audio(audio, format="audio/wav")
+    with st.spinner("Transcribing your voice..."):
+        user_text = speech_to_text(audio.read())
+    if user_text:
+        st.write(f"**You said:** {user_text}")
+
+        # Call AI model (replace with your actual AI logic)
+        ai_reply = f"I heard you say: '{user_text}'. Remember, you are strong and valued 💖"
+
+        st.write("**AI says:**", ai_reply)
+
+        # Convert AI reply to speech
+        with st.spinner("Converting reply to voice..."):
+            audio_response = text_to_speech(ai_reply)
+        if audio_response:
+            st.audio(audio_response, format="audio/wav")
+    else:
+        st.error("Couldn't transcribe your voice. Try again.")
 
 
 

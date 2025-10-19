@@ -311,12 +311,43 @@ def show_full_post(post_id):
                 "comment": comment_text,
                 "timestamp": datetime.now()
             })
+
+            # Save comments to JSON file
+            with open('data/comments.json', 'w') as f:
+                comments_json = {
+                    post_id: [
+                        {
+                            "author": comment["author"],
+                            "comment": comment["comment"],
+                            "timestamp": comment["timestamp"].strftime("%Y-%m-%d %H:%M:%S.%f"),
+                        }
+                        for comment in comment_list
+                    ]
+                    for post_id, comment_list in st.session_state.comments.items()
+                }
+                json.dump(comments_json, f, indent=4)
+
             st.rerun()
 
 def show():
     """Main function to render the blog page."""
-    # Initialize session state for comments if it doesn't exist
-    if 'comments' not in st.session_state:
+    # Load comments from JSON file
+    try:
+        with open('data/comments.json', 'r') as f:
+            comments_json = json.load(f)
+            # Convert timestamps back to datetime objects
+            st.session_state.comments = {
+                int(post_id): [
+                    {
+                        "author": comment["author"],
+                        "comment": comment["comment"],
+                        "timestamp": datetime.strptime(comment["timestamp"], "%Y-%m-%d %H:%M:%S.%f"),
+                    }
+                    for comment in comment_list
+                ]
+                for post_id, comment_list in comments_json.items()
+            }
+    except (FileNotFoundError, json.JSONDecodeError):
         st.session_state.comments = {}
 
     if "selected_blog_post" in st.session_state:

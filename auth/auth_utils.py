@@ -1,6 +1,7 @@
 import sqlite3
 import bcrypt
 from datetime import datetime
+from auth.password_validator import PasswordValidator
 
 def init_db():
     conn = sqlite3.connect("users.db")

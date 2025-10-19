@@ -435,20 +435,20 @@ def apply_custom_css():
             color: rgba(255,255,255,0.7);
         }}
         
-        /* Sidebar Tip Card */
-        .sidebar-tip-card {{
-            background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(34,197,94,0.15) 100%);
+        /* Sidebar Wellness Tip Section */
+        .sidebar-wellness-section {{
+            background: linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(168,85,247,0.15) 100%);
             border-radius: var(--radius-lg);
             padding: 15px;
             margin-bottom: 15px;
             text-align: center;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(16,185,129,0.3);
+            border: 1px solid rgba(139,92,246,0.3);
         }}
         
-        .tip-header {{
+        .wellness-header {{
             font-weight: 600;
-            color: #a7f3d0;
+            color: #c4b5fd;
             margin-bottom: 10px;
         }}
         

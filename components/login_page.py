@@ -5,18 +5,65 @@ from auth.auth_utils import register_user, authenticate_user , check_user
 from auth.mail_utils import send_reset_email
 from auth.jwt_utils import create_reset_token
 from core.utils import set_authenticated_user
+from auth.password_validator import PasswordValidator
+
 def validate_email(email):
     """Validate email format"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
 def validate_password(password):
-    """Validate password strength"""
-    if len(password) < 6:
-        return False, "Password must be at least 6 characters long"
-    if not re.search(r'[A-Za-z]', password):
-        return False, "Password must contain at least one letter"
-    return True, "Valid password"
+    """Validate password strength using NIST guidelines"""
+    return PasswordValidator.validate_password(password)
+
+def render_password_strength_meter(password):
+    """Render password strength meter with real-time feedback"""
+    if not password:
+        return
+
+    strength_data = PasswordValidator.calculate_strength(password)
+    score = strength_data['score']
+    strength = strength_data['strength']
+    color = strength_data['color']
+    checks = strength_data['checks']
+    feedback = strength_data['feedback']
+
+    # Render strength meter
+    st.markdown(f"""
+    <div class="password-strength-container">
+        <div class="strength-meter-wrapper">
+            <div class="strength-meter-bar" style="width: {score}%; background-color: {color};"></div>
+        </div>
+        <div class="strength-label" style="color: {color};">
+            {strength} ({score}%)
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Render requirements checklist
+    st.markdown('<div class="password-requirements">', unsafe_allow_html=True)
+    st.markdown('<div class="requirements-title">Password Requirements:</div>', unsafe_allow_html=True)
+
+    requirements = [
+        ("✅" if checks['length'] else "❌", "At least 8 characters long", checks['length']),
+        ("✅" if checks['uppercase'] else "❌", "Contains uppercase letter (A-Z)", checks['uppercase']),
+        ("✅" if checks['lowercase'] else "❌", "Contains lowercase letter (a-z)", checks['lowercase']),
+        ("✅" if checks['digit'] else "❌", "Contains number (0-9)", checks['digit']),
+        ("✅" if checks['special'] else "❌", "Contains special character (!@#$%^&*)", checks['special']),
+        ("✅" if checks['not_common'] else "❌", "Not a common password", checks['not_common']),
+        ("✅" if checks['no_sequential'] else "❌", "No sequential characters", checks['no_sequential']),
+        ("✅" if checks['no_repeated'] else "❌", "No repeated characters", checks['no_repeated']),
+    ]
+
+    for icon, text, passed in requirements:
+        color_class = "requirement-met" if passed else "requirement-unmet"
+        st.markdown(f'<div class="requirement-item {color_class}">{icon} {text}</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Show feedback if not strong enough
+    if score < 80 and len(feedback) > 0:
+        st.markdown(f'<div class="password-feedback">💡 <strong>Tips:</strong> {", ".join(feedback[:3])}</div>', unsafe_allow_html=True)
 
 def inject_text_visibility_css():
     st.markdown("""
@@ -169,6 +216,77 @@ def show_login_page():
         .switch-link button:hover {
             color: #ffb6d5;
         }
+        /* Password Strength Meter Styles */
+        .password-strength-container {
+            margin: 1rem 0;
+            padding: 0.8rem;
+            background: rgba(255, 246, 250, 0.6);
+            border-radius: 12px;
+            border: 1px solid #ffb6d5;
+        }
+        .strength-meter-wrapper {
+            width: 100%;
+            height: 8px;
+            background: #ffe0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .strength-meter-bar {
+            height: 100%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            border-radius: 10px;
+        }
+        .strength-label {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Baloo 2', cursive;
+            margin-top: 0.3rem;
+        }
+        .password-requirements {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 246, 250, 0.4);
+            border-radius: 10px;
+            font-size: 0.85rem;
+        }
+        .requirements-title {
+            font-weight: 700;
+            color: #ff69b4;
+            margin-bottom: 0.5rem;
+            font-family: 'Baloo 2', cursive;
+        }
+        .requirement-item {
+            padding: 0.3rem 0;
+            font-family: 'Baloo 2', cursive;
+            transition: all 0.2s ease;
+        }
+        .requirement-met {
+            color: #6BCF7F;
+        }
+        .requirement-unmet {
+            color: #FF6B6B;
+        }
+        .password-feedback {
+            margin-top: 0.8rem;
+            padding: 0.6rem;
+            background: rgba(255, 182, 213, 0.2);
+            border-left: 3px solid #ff69b4;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #ff69b4;
+            font-family: 'Baloo 2', cursive;
+        }
+        .password-hint {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #ffb6d5;
+            font-family: 'Baloo 2', cursive;
+            font-style: italic;
+        }
         /* Floating hearts animation */
         </style>
         """,
@@ -217,7 +335,16 @@ def show_login_page():
         with form_container:
             name = st.text_input("Name", placeholder="Enter your full name", label_visibility="collapsed", key="signup_name")
             email = st.text_input("Email", placeholder="your.email@example.com", label_visibility="collapsed", key="signup_email")
+
+            # Password input - Streamlit reruns automatically on every keystroke
             password = st.text_input("Password", type="password", placeholder="••••••••", label_visibility="collapsed", key="signup_password")
+
+            # Show password strength meter automatically as user types (no need to press Enter)
+            if password:
+                render_password_strength_meter(password)
+            else:
+                # Show a hint when password field is empty
+                st.markdown('<div class="password-hint">💡 Start typing to see password strength (updates automatically)</div>', unsafe_allow_html=True)
 
             st.markdown('<div class="auth-button">', unsafe_allow_html=True)
             if st.button("Sign Up", key="signup_submit"):

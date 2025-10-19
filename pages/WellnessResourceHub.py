@@ -16,6 +16,9 @@ page = st.sidebar.radio(
         "📅 Daily Planner",
         "🎯 Wellness Goals",
         "📊 Mood Tracker",
+        "🍴 Food & Mood Journal",
+        "🏆 Wellness Challenges",
+        "🧠 Wellness Micro-learning",
         "📓 Journaling Prompts",
         "📚 Wellness Resources",
         "🤝 Community Tips",
@@ -49,6 +52,11 @@ categories = {
         "Try deep breathing (inhale 4s, hold 4s, exhale 4s)",
         "Listen to calming music",
         "Take short breaks while working"
+    ],
+    "🏃 Exercise": [
+        "Start with 10–15 minutes of light cardio like walking",
+        "Stretch your body after sitting too long",
+        "Try fun activities like dancing or cycling"
     ]
 }
 
@@ -167,6 +175,12 @@ if page == "🏠 Wellness Hub":
         with st.container(border=True):
             st.subheader("😴 Sleep")
             for tip in categories["😴 Sleep"]:
+                st.write(f"- {tip}")
+            st.write(" ")
+
+        with st.container(border=True):
+            st.subheader("🏃 Exercise")
+            for tip in categories["🏃 Exercise"]:
                 st.write(f"- {tip}")
             st.write(" ")
 
@@ -580,7 +594,7 @@ elif page == "📊 Mood Tracker":
 
             with st.expander(f"{mood_icon} {date_str} - Intensity: {intensity}"):
                 if entry.get('note'):
-                    st.write(f"**Note:** *{entry['note']}*")
+                    st.write(f"**Note:** *{entry['note']}*" )
                 
                 if entry.get('tags'):
                     st.write("**Tags:**")
@@ -669,6 +683,301 @@ elif page == "📊 Mood Tracker":
 
     else:
         st.info("No moods logged yet.")
+
+# --- Page for Food & Mood Journal ---
+elif page == "🍴 Food & Mood Journal":
+    st.title("🍴 Food & Mood Journal")
+    st.write("Track your meals and mood to discover connections between what you eat and how you feel.")
+
+    # Initialize session state
+    if "food_journal" not in st.session_state:
+        st.session_state.food_journal = []
+
+    with st.container(border=True):
+        st.subheader("Log a New Entry")
+        
+        entry_date = st.date_input("Date", datetime.now())
+        
+        mood_options = {"😊 Positive": "😊", "😐 Neutral": "😐", "😟 Negative": "😟"}
+        selected_mood = st.radio("Overall Mood", options=list(mood_options.keys()), horizontal=True)
+
+        breakfast = st.text_input("🍳 Breakfast", placeholder="e.g., Oatmeal with berries")
+        lunch = st.text_input("🥗 Lunch", placeholder="e.g., Chicken salad")
+        dinner = st.text_input("🍝 Dinner", placeholder="e.g., Salmon and vegetables")
+        snacks = st.text_input("🥨 Snacks", placeholder="e.g., Apple, nuts")
+        
+        note = st.text_area("Notes", placeholder="Any specific feelings, cravings, or context?")
+
+        if st.button("Save Entry"):
+            st.session_state.food_journal.append({
+                "date": entry_date,
+                "mood": selected_mood,
+                "meals": {
+                    "breakfast": breakfast,
+                    "lunch": lunch,
+                    "dinner": dinner,
+                    "snacks": snacks
+                },
+                "note": note
+            })
+            st.success("Entry saved!")
+            st.rerun()
+
+    st.markdown("---")
+
+    if st.session_state.food_journal:
+        st.subheader("📖 Your Journal History")
+        
+        # Sort entries by date
+        sorted_entries = sorted(st.session_state.food_journal, key=lambda x: x['date'], reverse=True)
+
+        for entry in sorted_entries:
+            mood_icon = mood_options.get(entry['mood'], "❔")
+            with st.expander(f"{mood_icon} {entry['date'].strftime('%B %d, %Y')} - Mood: {entry['mood']}"):
+                st.write(f"**Breakfast:** {entry['meals']['breakfast'] or 'Not logged'}")
+                st.write(f"**Lunch:** {entry['meals']['lunch'] or 'Not logged'}")
+                st.write(f"**Dinner:** {entry['meals']['dinner'] or 'Not logged'}")
+                st.write(f"**Snacks:** {entry['meals']['snacks'] or 'Not logged'}")
+                if entry['note']:
+                    st.write(f"**Notes:** {entry['note']}")
+    else:
+        st.info("No entries yet. Add one above to get started.")
+
+# --- Page for Wellness Challenges ---
+elif page == "🏆 Wellness Challenges":
+    st.title("🏆 Wellness Challenges")
+    st.write("Join a challenge to build healthy habits and boost your well-being in a fun, structured way!")
+
+    challenges = {
+        "7-Day Mindfulness Challenge": {
+            "description": "A one-week challenge to cultivate mindfulness and reduce stress through short, daily practices.",
+            "duration": 7,
+            "tasks": [
+                "Day 1: Pay full attention to one meal without distractions.",
+                "Day 2: Take a 5-minute mindful walk, noticing your surroundings.",
+                "Day 3: Practice 3 minutes of mindful breathing.",
+                "Day 4: Notice five things you can see, four you can feel, three you can hear.",
+                "Day 5: Listen to a song and give it your complete attention.",
+                "Day 6: Do one daily chore (like washing dishes) mindfully.",
+                "Day 7: Reflect on one positive thing that happened today."
+            ]
+        },
+        "5-Day Gratitude Challenge": {
+            "description": "Boost your mood by focusing on the good things in life for five consecutive days.",
+            "duration": 5,
+            "tasks": [
+                "Day 1: Write down three things you are grateful for today.",
+                "Day 2: Send a 'thank you' message to someone.",
+                "Day 3: Appreciate a simple pleasure (like a cup of tea or a sunny spot).",
+                "Day 4: Acknowledge a personal strength you are grateful for.",
+                "Day 5: Reflect on a challenge that taught you something valuable."
+            ]
+        },
+        "7-Day Digital Detox": {
+            "description": "Reduce screen time and reconnect with the world around you.",
+            "duration": 7,
+            "tasks": [
+                "Day 1: No phone for the first hour after waking up.",
+                "Day 2: Unfollow 10 social media accounts that don't bring you joy.",
+                "Day 3: Set a 30-minute time limit for social media today.",
+                "Day 4: Have a screen-free meal.",
+                "Day 5: Read a physical book or magazine for 15 minutes.",
+                "Day 6: Go for a walk without your phone.",
+                "Day 7: No screens for one hour before bed."
+            ]
+        }
+    }
+
+    if 'challenge_progress' not in st.session_state:
+        st.session_state.challenge_progress = {}
+
+    st.markdown("---")
+    selected_challenge = st.selectbox("Choose a challenge to start:", list(challenges.keys()))
+
+    if selected_challenge:
+        challenge_data = challenges[selected_challenge]
+        
+        # Initialize progress for the selected challenge if not already started
+        if selected_challenge not in st.session_state.challenge_progress:
+            st.session_state.challenge_progress[selected_challenge] = [False] * challenge_data["duration"]
+
+        st.subheader(selected_challenge)
+        st.markdown(f"*{challenge_data['description']}*")
+
+        progress = st.session_state.challenge_progress[selected_challenge]
+        completed_tasks = sum(progress)
+        total_tasks = len(progress)
+        
+        st.progress(completed_tasks / total_tasks, text=f"{completed_tasks}/{total_tasks} Days Completed")
+
+        if completed_tasks == total_tasks:
+            st.balloons()
+            st.success("🎉 Congratulations! You've completed the challenge! 🎉")
+
+        st.markdown("---")
+
+        for i, task in enumerate(challenge_data["tasks"]):
+            is_done = st.checkbox(task, value=progress[i], key=f"{selected_challenge}_{i}")
+            if is_done != progress[i]:
+                st.session_state.challenge_progress[selected_challenge][i] = is_done
+                st.rerun()
+
+# --- Page for Wellness Micro-learning ---
+elif page == "🧠 Wellness Micro-learning":
+    st.title("🧠 Wellness Micro-learning")
+    st.write("Explore these short, easy-to-digest articles to learn more about mental health and well-being.")
+
+    learning_topics = {
+        "What is Mindfulness?": {
+            "emoji": "🧘",
+            "content": """
+            Mindfulness is the basic human ability to be fully present, aware of where we are and what we’re doing, and not overly reactive or overwhelmed by what’s going on around us.
+
+            **Key elements:**
+            - **Awareness:** Paying attention to your thoughts, feelings, and bodily sensations.
+            - **Present Moment:** Focusing on the here and now, rather than dwelling on the past or worrying about the future.
+            - **Non-Judgment:** Observing your thoughts and feelings without labeling them as "good" or "bad."
+
+            **Simple Practice:**
+            Try focusing on your breath for one minute. Notice the sensation of the air entering and leaving your body. If your mind wanders, gently guide it back to your breath. That's a moment of mindfulness!
+            """
+        },
+        "The Science of Gratitude": {
+            "emoji": "🙏",
+            "content": """
+            Practicing gratitude is more than just good manners; it has scientifically-proven benefits for your mental health.
+
+            **How it works:**
+            - **Rewires Your Brain:** Regularly practicing gratitude can strengthen neural pathways, making you more likely to notice positive things.
+            - **Reduces Toxic Emotions:** Studies show that gratitude effectively increases happiness and reduces depression.
+            - **Improves Sleep:** Writing in a gratitude journal before bed has been shown to improve sleep quality.
+
+            **Simple Practice:**
+            At the end of each day, write down three specific things you were grateful for and why. It could be as simple as a sunny day or a nice conversation.
+            """
+        },
+        "Understanding Cognitive Distortions": {
+            "emoji": "🤔",
+            "content": """
+            Cognitive distortions are irrational ways of thinking that can negatively impact your mood. They are like mental filters that make us see reality inaccurately. Learning to recognize them is the first step to changing them.
+
+            **Common Examples:**
+            - **All-or-Nothing Thinking:** Seeing things in black-and-white categories. If your performance falls short of perfect, you see yourself as a total failure.
+            - **Catastrophizing:** Expecting the worst-case scenario to happen.
+            - **Personalization:** Blaming yourself for events that are not entirely your fault.
+
+            **What to do:**
+            When you notice a strong negative thought, ask yourself: "Is there another way to look at this?" or "What evidence do I have for this thought?" This practice is a core part of Cognitive Behavioral Therapy (CBT).
+            """
+        },
+        "Tips for Better Sleep Hygiene": {
+            "emoji": "😴",
+            "content": """
+            Good sleep hygiene means having both a bedroom environment and daily routines that promote consistent, uninterrupted sleep.
+
+            **Key Tips:**
+            - **Be Consistent:** Go to bed and wake up at the same time every day, even on weekends.
+            - **Create a Relaxing Routine:** Spend the last 30-60 minutes before bed doing something calming, like reading a book, listening to soft music, or taking a warm bath. Avoid screens.
+            - **Optimize Your Bedroom:** Keep your bedroom dark, quiet, and cool.
+            - **Avoid Stimulants:** Avoid caffeine, nicotine, and alcohol close to bedtime.
+
+            Improving sleep hygiene is one of the most effective ways to improve your overall sleep quality.
+            """
+        },
+        "What is Imposter Syndrome?": {
+            "emoji": "🎭",
+            "content": """
+            Imposter syndrome is the experience of feeling like a fraud, despite evidence of your accomplishments. You might feel like you don't deserve your success and are at risk of being "found out."
+
+            **Common Signs:**
+            - **Perfectionism:** Setting excessively high goals for yourself and then feeling like a failure when you fall short.
+            - **Downplaying Success:** Attributing your achievements to luck or external factors rather than your own abilities.
+            - **Fear of Failure:** An intense fear of being exposed as incompetent.
+
+            **How to Cope:**
+            Acknowledge your feelings, talk to someone you trust about it, and practice tracking your achievements to have concrete evidence of your competence.
+            """
+        },
+        "Progressive Muscle Relaxation (PMR)": {
+            "emoji": "💪",
+            "content": """
+            PMR is a deep relaxation technique that involves tensing and then relaxing different muscle groups in your body. It can help reduce physical tension and anxiety.
+
+            **How to do it:**
+            1. Find a quiet, comfortable place.
+            2. Start with your feet. Tense the muscles for 5 seconds, then release for 10-15 seconds, noticing the difference.
+            3. Move up your body, tensing and relaxing muscle groups one by one (legs, abdomen, arms, hands, shoulders, face).
+            4. Breathe slowly and deeply throughout the exercise.
+
+            A full session can take 10-15 minutes and is a great way to unwind before sleep.
+            """
+        },
+        "The 5-Minute Rule for Procrastination": {
+            "emoji": "⏱️",
+            "content": """
+            Procrastination often stems from feeling overwhelmed by a task. The 5-Minute Rule is a simple but powerful technique to overcome this inertia.
+
+            **The Rule:**
+            Commit to working on a task for just five minutes. After five minutes, you can choose to stop.
+
+            **Why it works:**
+            - **Lowers the Barrier:** Starting is the hardest part. Five minutes feels manageable.
+            - **Builds Momentum:** Often, once you start, you'll find the motivation to continue for longer than five minutes.
+            - **Reduces Anxiety:** It shifts your focus from the daunting size of the task to a small, achievable step.
+
+            Next time you're procrastinating, just tell yourself: "I'll just do it for five minutes."
+            """
+        },
+        "The RAIN Technique for Difficult Emotions": {
+            "emoji": "💧",
+            "content": """
+            RAIN is a four-step mindfulness practice to help you cope with difficult emotions in a healthy way, rather than suppressing them.
+
+            **The Steps:**
+            - **R - Recognize:** Acknowledge what you are feeling. Simply name it, e.g., "This is anxiety."
+            - **A - Allow:** Let the feeling be there without trying to fix or change it. Don't judge yourself for having the emotion.
+            - **I - Investigate:** Gently explore the feeling with curiosity. How does it feel in your body? What thoughts are coming with it?
+            - **N - Nurture:** Offer yourself some self-compassion. You might place a hand on your heart and say something kind to yourself, like "This is a moment of suffering. It's okay."
+            """
+        },
+        "Benefits of Journaling": {
+            "emoji": "📓",
+            "content": """
+            Journaling is a powerful tool for self-exploration and stress management. It doesn't have to be a "dear diary" format.
+
+            **Key Benefits:**
+            - **Clarifies Thoughts and Feelings:** Writing down your thoughts can help you understand them more clearly.
+            - **Reduces Stress:** Managing anxiety by writing about your feelings can help your brain regulate emotions.
+            - **Problem-Solving:** Writing about problems can help you brainstorm solutions and see them from a new perspective.
+            - **Tracks Patterns:** Over time, you can identify triggers and learn more about what affects your mood.
+
+            **How to Start:**
+            Don't worry about grammar or structure. Just write whatever comes to mind for 5-10 minutes. Use the prompts in this app to get started!
+            """
+        },
+        "Setting Healthy Boundaries": {
+            "emoji": "🚧",
+            "content": """
+            Boundaries are limits you set for yourself to protect your well-being. They define what you are and are not okay with.
+
+            **Why they are important:**
+            - **Prevents Burnout:** Boundaries protect your time and energy.
+            - **Improves Relationships:** Clear boundaries lead to healthier, more respectful interactions.
+            - **Increases Self-Esteem:** Setting and maintaining boundaries shows that you value yourself.
+
+            **How to Set Them:**
+            1. **Identify Your Limits:** Figure out what makes you feel uncomfortable or stressed.
+            2. **Communicate Clearly:** State your needs simply and respectfully. Use "I" statements, e.g., "I need some quiet time after work."
+            3. **Be Firm:** It's okay to say "no" without a long explanation. Remember that your needs are valid.
+            """
+        }
+    }
+
+    st.markdown("---")
+
+    for topic, data in learning_topics.items():
+        with st.expander(f"{data['emoji']} {topic}"):
+            st.markdown(data["content"])
 
 # --- Page 6: Journaling Prompts ---
 elif page == "📓 Journaling Prompts":

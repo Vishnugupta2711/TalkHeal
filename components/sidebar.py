@@ -145,27 +145,65 @@ WELLNESS_TIPS = [
     "Send a kind message to someone you care about 💝",
     "Look out a window and notice something beautiful in nature 🌿",
     "Put your phone away for 10 minutes and just be present 📱",
-    "Smile at yourself in the mirror. You deserve kindness 😊"
+    "Smile at yourself in the mirror. You deserve kindness 😊",
+    "Step outside for 5 minutes of fresh air. 🍃",
+    "Close your eyes and focus on your breathing for 30 seconds. 🧘"
 ]
 
+# def render_daily_tip():
+#     """Show a random wellness tip"""
+    
+#     # Get a random tip
+#     if "current_tip" not in st.session_state:
+#         st.session_state.current_tip = random.choice(WELLNESS_TIPS)
+    
+#     # Show the tip in a nice box
+#     st.info(st.session_state.current_tip)
+    
+#     # Buttons
+#     col1, col2 = st.columns(2)
+#     with col1:
+#         if st.button("💚 Helpful", key="tip_helpful"):
+#             st.success("Glad it helped! 😊")
+#     with col2:
+#         if st.button("🔄 New Tip", key="new_tip"):
+#             st.session_state.current_tip = random.choice(WELLNESS_TIPS)
+#             st.rerun()
+
 def render_daily_tip():
-    """Show a random wellness tip"""
-    
-    # Get a random tip
+    """Show a random wellness tip with better UX and rotation"""
+
+    # Initialize session state
+    if "tip_queue" not in st.session_state or not st.session_state.tip_queue:
+        st.session_state.tip_queue = random.sample(WELLNESS_TIPS, len(WELLNESS_TIPS))
+
     if "current_tip" not in st.session_state:
-        st.session_state.current_tip = random.choice(WELLNESS_TIPS)
-    
-    # Show the tip in a nice box
+        st.session_state.current_tip = st.session_state.tip_queue.pop()
+
+    # Custom header
+    st.markdown(""" 
+        <div class="sidebar-wellness-section"> 
+            <div class="wellness-header">💡 Wellness Tip</div> 
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Show current tip
     st.info(st.session_state.current_tip)
-    
-    # Buttons
+
+    # Feedback prompt
+    st.markdown("### 🤔 Was this helpful?")
+
+    # Feedback buttons
     col1, col2 = st.columns(2)
     with col1:
         if st.button("💚 Helpful", key="tip_helpful"):
             st.success("Glad it helped! 😊")
     with col2:
-        if st.button("🔄 New Tip", key="new_tip"):
-            st.session_state.current_tip = random.choice(WELLNESS_TIPS)
+        if st.button("🔄 Refresh Tip", key="new_tip"):
+            if not st.session_state.tip_queue:
+                # Refill the queue (reshuffle tips)
+                st.session_state.tip_queue = random.sample(WELLNESS_TIPS, len(WELLNESS_TIPS))
+            st.session_state.current_tip = st.session_state.tip_queue.pop()
             st.rerun()
 
 def render_ambient_sounds():
@@ -183,33 +221,33 @@ def render_ambient_sounds():
         calming_music = {
             "🎹 Peaceful Piano": {
                 "description": "Soft piano melodies for relaxation",
-                "embed_id": "1ZYbU82GVz4",  # Beautiful relaxing piano music
+                "embed_id": "CqeVIivHqAs",  # Beautiful relaxing piano music
                 "duration": "3 hours"
             },
             "🧘 Meditation Music": {
                 "description": "Gentle meditation and mindfulness music",
                 "embed_id": "lFcSrYw-ARY",  # Relaxing meditation music
-                "duration": "1 hour"
+                "duration": "3 hours"
             },
             "🎻 Calm Instrumental": {
                 "description": "Soothing instrumental music mix",
-                "embed_id": "M4QVYDTmjEg",  # Beautiful instrumental music
-                "duration": "2 hours"
+                "embed_id": "4wZmRQcIDME",  # Beautiful instrumental music
+                "duration": "1 hour"
             },
             "🌸 Zen Garden": {
                 "description": "Peaceful zen music for inner calm",
-                "embed_id": "5qap5aO4i9A",  # Zen music for relaxation
+                "embed_id": "6GxNJlmzqz4",  # Zen music for relaxation
                 "duration": "3 hours"
             },
             "💤 Sleep Music": {
                 "description": "Ultra calming music for deep relaxation",
-                "embed_id": "YQaW2gkV1iM",  # Sleep music, calming music
-                "duration": "8 hours"
+                "embed_id": "xQ6xgDI7Whc",  # Sleep music, calming music
+                "duration": "45 mins"
             },
             "🎶 Ambient Chillout": {
                 "description": "Soft ambient music for stress relief",
-                "embed_id": "rUxyKA_-grg",  # Chillout ambient music
-                "duration": "1 hour"
+                "embed_id": "cq2Ef6rvL6g",  # Chillout ambient music
+                "duration": "3 hours"
             }
         }
         

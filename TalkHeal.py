@@ -1,3 +1,4 @@
+from gzip import READ
 import streamlit as st
 from auth.auth_utils import init_db
 from components.login_page import show_login_page

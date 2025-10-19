@@ -78,10 +78,6 @@ def set_background_for_theme(selected_palette="pink"):
         unsafe_allow_html=True
     )
 
-# ✅ Set your background image
-selected_palette = st.session_state.get("palette_name", "Pink")
-set_background_for_theme(selected_palette)
-
 # Force your own page config
 st.set_page_config(
     page_title="Disease Predictor & Doctor Specialist Recommender",
@@ -89,6 +85,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ✅ Set your background image
+selected_palette = st.session_state.get("palette_name", "Pink")
+set_background_for_theme(selected_palette)
 
 if 'selected_symptoms' not in st.session_state:
     st.session_state.selected_symptoms = []
@@ -364,4 +364,3 @@ if st.sidebar.button("🔎 Predict Disease"):
                 if show_chart:
                     st.markdown("### 📊 Probability Chart", unsafe_allow_html=True)
                     st.bar_chart(result_df.set_index("Disease")["Chances (%)"])
-

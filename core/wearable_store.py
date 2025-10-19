@@ -97,3 +97,12 @@ def set_provider_connection(user_email: Optional[str], provider: str, connected:
 	data["updated_at"] = datetime.utcnow().isoformat()
 	save_user_wearables(user_email, data, anon_id)
 	return data
+
+
+def set_goals(email: str, goals: dict, anon_id: Optional[str] = None) -> Dict[str, Any]:
+    """Saves user-defined goals."""
+    user_data = load_user_wearables(email, anon_id)
+    user_data["goals"] = goals
+    user_data["goals_updated_at"] = datetime.utcnow().isoformat()
+    save_user_wearables(email, user_data, anon_id)
+    return user_data

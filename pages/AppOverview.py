@@ -1,160 +1,110 @@
 import streamlit as st
 import base64
 
-def get_base64_of_bin_file(image_path):
-    with open(image_path, "rb") as f:
-        return base64.b64encode(f.read()).decode()
+st.set_page_config(page_title="App Overview", layout="wide")
 
-def set_background_for_theme(selected_palette="pink"):
+# --- Asset Loading & Theming ---
+def set_page_theme_and_style():
     from core.theme import get_current_theme
-
-    # --- Get current theme info ---
-    current_theme = st.session_state.get("current_theme", None)
-    if not current_theme:
-        current_theme = get_current_theme()
-    
+    current_theme = st.session_state.get("current_theme") or get_current_theme()
     is_dark = current_theme["name"] == "Dark"
+    selected_palette = st.session_state.get("palette_name", "Pink")
 
-    # --- Map light themes to background images ---
-    palette_color = {
-        "light": "static_files/pink.png",
-        "calm blue": "static_files/blue.png",
-        "mint": "static_files/mint.png",
-        "lavender": "static_files/lavender.png",
-        "pink": "static_files/pink.png"
-    }
+    try:
+        with open(f"static_files/{'dark.png' if is_dark else selected_palette.lower() + '.png'}", "rb") as f:
+            encoded_string = base64.b64encode(f.read()).decode()
+    except FileNotFoundError:
+        encoded_string = ""
 
-    # --- Select background based on theme ---
-    if is_dark:
-        background_image_path = "static_files/dark.png"
-    else:
-        background_image_path = palette_color.get(selected_palette.lower(), "static_files/pink.png")
-
-    encoded_string = get_base64_of_bin_file(background_image_path)
-    st.markdown(
-        f"""
+    st.markdown(f'''
         <style>
-        /* Entire app background */
+        @keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+
         html, body, [data-testid="stApp"] {{
-            background-color: {'rgba(0, 0, 0, 0.5)' if is_dark else 'rgba(255, 255, 255, 0.3)'} !important;
-            transition: background-color 0.4s ease;
             background-image: url("data:image/png;base64,{encoded_string}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
         }}
-
-        /* Main content transparency */
-        .block-container {{
-            background-color: rgba(255, 255, 255, 0);
-        }}
-
-        /* Sidebar: brighter translucent background */
-        [data-testid="stSidebar"] {{
-            background-color: rgba(255, 255, 255, 0.6);  /* Brighter and translucent */
-            color: {'black' if is_dark else 'rgba(49, 51, 63, 0.8)'} ;  /* Adjusted for light background */
-        }}
+        .block-container {{ background-color: transparent; }}
+        [data-testid="stSidebar"] {{ background-color: rgba(255, 255, 255, 0.6); }}
+        [data-testid="stHeader"] {{ background-color: transparent; }}
         
-        span {{
-            color: {'#f0f0f0' if is_dark else 'rgba(49, 51, 63, 0.8)'} !important;
-            transition: color 0.3s ease;
-        }}
 
-        /* Header bar: fully transparent */
-        [data-testid="stHeader"] {{
-            background-color: rgba(0, 0, 0, 0);
-        }}
+        h2 {{ text-align: center; font-weight: 600; margin-bottom: 2rem; }}
 
-        /* Hide left/right arrow at sidebar bottom */
-        button[title="Close sidebar"],
-        button[title="Open sidebar"] {{
-            display: none !important;
+        .card {{
+            background-color: {'rgba(40, 40, 40, 0.7)' if is_dark else 'rgba(255, 255, 255, 0.7)'};
+            border-radius: 15px; padding: 25px; text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: transform 0.2s; height: 100%;
+            animation: fadeInUp 0.5s ease-out forwards; opacity: 0;
         }}
+        .card:hover {{ transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }}
+        .card-icon {{ font-size: 2.5rem; margin-bottom: 10px; }}
+        .card-title {{ font-size: 1.15rem; font-weight: 600; margin-bottom: 10px; }}
+        
+        /* Staggered animation for cards */
+        .st-emotion-cache-r421ms:nth-child(1) .card {{ animation-delay: 0.1s; }}
+        .st-emotion-cache-r421ms:nth-child(2) .card {{ animation-delay: 0.2s; }}
+        .st-emotion-cache-r421ms:nth-child(3) .card {{ animation-delay: 0.3s; }}
+        .st-emotion-cache-r421ms:nth-child(4) .card {{ animation-delay: 0.4s; }}
+        .st-emotion-cache-r421ms:nth-child(5) .card {{ animation-delay: 0.5s; }}
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    ''', unsafe_allow_html=True)
 
-# ✅ Set your background image
-selected_palette = st.session_state.get("palette_name", "Pink")
-set_background_for_theme(selected_palette)
+# --- Page Layout ---
+
+set_page_theme_and_style()
+
+# --- Header Section ---
+st.title("Welcome to TalkHeal")
+
+header_col1, header_col2 = st.columns([1.5, 2])
+with header_col1:
+    st.image("static_files/Home_Pink.png", use_column_width=True)
+
+with header_col2:
+    st.markdown("### Your trusted companion for mental wellness, designed to empower you on your journey to emotional health.")
+    st.markdown("TalkHeal provides a safe and supportive space with tools and resources to help you understand your emotions, build healthy habits, and connect with a caring community.")
+    st.link_button("💬 Join the Community Forum", "/CommunityForum", use_container_width=True)
 
 
-def show_app_overview():
 
-    # --- Community Toggle Button CSS and HTML ---
-    community_toggle_css = '''
-        <style>
-        .community-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 2rem auto 1.5rem auto;
-        }
-        .community-btn {
-            background: linear-gradient(90deg, #ffb6d5 0%, #d14a7a 100%);
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 2rem;
-            padding: 0.9rem 2.2rem;
-            box-shadow: 0 4px 18px 0 rgba(209,74,122,0.13);
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            outline: none;
-        }
-        .community-btn:hover {
-            background: linear-gradient(90deg, #d14a7a 0%, #ffb6d5 100%);
-            transform: translateY(-2px) scale(1.04);
-        }
-        </style>
-    '''
-    community_toggle_html = '''
-        <div class="community-toggle">
-            <a href="/app" target="_self" style="text-decoration: none;">
-                <button class="community-btn">
-                    💬 Join the Community Forum
-                </button>
-            </a>
-        </div>
-    '''
-    st.markdown(community_toggle_css, unsafe_allow_html=True)
-    st.markdown(community_toggle_html, unsafe_allow_html=True)
+# --- Key Features Section ---
+st.header("Key Features")
 
-    st.markdown("""
-        <div style='background-color: #ffe4ef; border-radius: 15px; padding: 2rem; margin-bottom: 2rem;'>
-            <h2 style='color: #d6336c; text-align: center;'>App Overview</h2>
-        </div>
-    """, unsafe_allow_html=True)
+features = [
+    {"icon": "📊", "title": "Mood Tracking", "text": "Visualize your emotional patterns and gain insights into your mental state over time."},
+    {"icon": "🧘", "title": "Coping Tools", "text": "Engage with guided breathing exercises, journaling, and other self-help utilities."},
+    {"icon": "📚", "title": "Resource Hub", "text": "Explore a rich library of articles, guides, and expert advice on various mental health topics."},
+    {"icon": "💬", "title": "Community Support", "text": "Connect with peers in a safe, inclusive, and supportive forum environment."},
+    {"icon": "🏆", "title": "Personal Dashboard", "text": "Track your progress, view your achievements, and stay motivated on your wellness journey."}
+]
 
-    st.markdown("""
-        <div style='background-color: #fff; border-radius: 10px; box-shadow: 0 2px 8px #d6336c22; padding: 2rem; margin-bottom: 2rem;'>
-            <h3 style='color: #d6336c;'>Welcome to TalkHeal!</h3>
-            <div style='color: #000;'>
-                TalkHeal is your trusted companion for mental wellness, designed to empower you on your journey to emotional health.<br><br>
-                <b>Key Features:</b>
-                <ul>
-                    <li><b>Mood Tracking:</b> Visualize your emotional patterns.</li>
-                    <li><b>Coping Tools:</b> Breathing exercises & journaling.</li>
-                    <li><b>Resource Hub:</b> Articles, guides, expert advice.</li>
-                    <li><b>Community Support:</b> Safe, inclusive space.</li>
-                    <li><b>Dashboard:</b> Track progress and achievements.</li>
-                </ul>
-                <br>
-                <b>Why TalkHeal?</b><br>
-                <ul>
-                    <li>Soothing, user-friendly design.</li>
-                    <li>Privacy-first, secure data.</li>
-                    <li>Works on all devices.</li>
-                    <li>Free to start, premium for more.</li>
-                </ul>
-                <br>
-                <b>Start your journey with TalkHeal and discover a happier, healthier you!</b>
+feature_cols = st.columns(len(features))
+for i, feature in enumerate(features):
+    with feature_cols[i]:
+        st.markdown(f'''
+            <div class="card">
+                <div class="card-icon">{feature["icon"]}</div>
+                <div class="card-title">{feature["title"]}</div>
+                <p>{feature["text"]}</p>
             </div>
-        </div>
-    """, unsafe_allow_html=True)
+        ''', unsafe_allow_html=True)
 
-# 🔹 Call function so Streamlit actually runs it
-show_app_overview()
+
+
+# --- Why TalkHeal Section ---
+st.header("Why TalkHeal?")
+
+why_cols = st.columns(2)
+with why_cols[0]:
+    st.subheader("User-Centric Design")
+    st.markdown("✅ **Soothing & Intuitive:** A calming, user-friendly interface designed to make your wellness journey as smooth as possible.")
+    st.markdown("✅ **Cross-Device Access:** Use TalkHeal seamlessly on your phone, tablet, or computer.")
+with why_cols[1]:
+    st.subheader("Safe & Secure")
+    st.markdown("🔒 **Privacy-First:** Your data is kept secure and private, because your trust is our top priority.")
+    st.markdown("💰 **Free to Start:** Access core features for free, with affordable options for advanced tools.")
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.info("**Start your journey with TalkHeal today and discover a happier, healthier you!**", icon="💖")
