@@ -11,6 +11,12 @@ from components.thought_reframing import render_thought_reframing
 from components.sleep_hygiene import render_sleep_hygiene_toolkit
 from components.medication_reminder import render_medication_reminder
 from components.self_compassion import render_self_compassion_tool
+from components.crisis_action_plan import render_crisis_action_plan
+from components.pomodoro_focus import render_pomodoro_focus
+from components.pmr_guide import render_pmr_guide
+from components.values_clarification import render_values_clarification
+from components.therapy_tool import render_therapy_tool
+from components.playlist_generator import render_playlist_generator
 from streamlit_js_eval import streamlit_js_eval
 import requests
 import base64
@@ -212,12 +218,18 @@ st.title("🧰 Self Help Tools")
 
 tools = {
     "focus": {"name": "Focus Session", "icon": "🧘"},
+    "pomodoro": {"name": "Pomodoro Focus", "icon": "⏱️"},
+    "pmr": {"name": "Muscle Relaxation (PMR)", "icon": "🧩"},
+    "values": {"name": "Values Clarification", "icon": "🎯"},
+    "therapy": {"name": "Therapy Prep & Notes", "icon": "📈"},
+    "playlist": {"name": "Playlist Generator", "icon": "🎵"},
     "mood_dashboard": {"name": "Mood Dashboard", "icon": "📊"},
     "mental_check": {"name": "Mental Health Check", "icon": "🧠"},
     "thought_reframing": {"name": "Thought Reframing (CBT)", "icon": "💭"},
     "sleep_hygiene": {"name": "Sleep Hygiene Toolkit", "icon": "🌙"},
     "medication_reminder": {"name": "Medication Reminder", "icon": "🔔"},
     "self_compassion": {"name": "Self-Compassion Practice", "icon": "🌱"},
+    "crisis_plan": {"name": "Crisis Action Plan", "icon": "🆘"},
     "knowledge": {"name": "Knowledge Base", "icon": "📚"},
     "crisis": {"name": "Crisis Support", "icon": "☎️"},
     "quizzes": {"name": "PsyToolkit Quizzes", "icon": "🧪"},
@@ -301,8 +313,21 @@ st.markdown("---")
 if st.session_state.active_tool == "focus":
     st.header("🧘 Focus Session")
     render_focus_session()
-    # st.session_state.show_focus_session = True
-    
+
+elif st.session_state.active_tool == "pomodoro":
+    render_pomodoro_focus()
+
+elif st.session_state.active_tool == "pmr":
+    render_pmr_guide()
+
+elif st.session_state.active_tool == "values":
+    render_values_clarification()
+
+elif st.session_state.active_tool == "therapy":
+    render_therapy_tool()
+
+elif st.session_state.active_tool == "playlist":
+    render_playlist_generator()
 
 elif st.session_state.active_tool == "mood_dashboard":
     render_mood_dashboard()
@@ -436,6 +461,9 @@ elif st.session_state.active_tool == "medication_reminder":
 
 elif st.session_state.active_tool == "self_compassion":
     render_self_compassion_tool()
+
+elif st.session_state.active_tool == "crisis_plan":
+    render_crisis_action_plan()
 
 elif st.session_state.active_tool == "knowledge":
     st.header("📚 Resources & Knowledge Base")
