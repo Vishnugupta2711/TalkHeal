@@ -7,6 +7,10 @@ from components.mood_dashboard import render_mood_dashboard, MoodTracker
 from components.profile import initialize_profile_state, render_profile_section
 from components.focus_session import render_focus_session
 from components.quick_coping_cards import render_quick_coping_cards
+from components.thought_reframing import render_thought_reframing
+from components.sleep_hygiene import render_sleep_hygiene_toolkit
+from components.medication_reminder import render_medication_reminder
+from components.self_compassion import render_self_compassion_tool
 from streamlit_js_eval import streamlit_js_eval
 import requests
 import base64
@@ -210,6 +214,10 @@ tools = {
     "focus": {"name": "Focus Session", "icon": "🧘"},
     "mood_dashboard": {"name": "Mood Dashboard", "icon": "📊"},
     "mental_check": {"name": "Mental Health Check", "icon": "🧠"},
+    "thought_reframing": {"name": "Thought Reframing (CBT)", "icon": "💭"},
+    "sleep_hygiene": {"name": "Sleep Hygiene Toolkit", "icon": "🌙"},
+    "medication_reminder": {"name": "Medication Reminder", "icon": "🔔"},
+    "self_compassion": {"name": "Self-Compassion Practice", "icon": "🌱"},
     "knowledge": {"name": "Knowledge Base", "icon": "📚"},
     "crisis": {"name": "Crisis Support", "icon": "☎️"},
     "quizzes": {"name": "PsyToolkit Quizzes", "icon": "🧪"},
@@ -416,6 +424,18 @@ elif st.session_state.active_tool == "mental_check":
         st.success(st.session_state.mood_tip_display)
     if st.session_state.mood_entry_status:
         st.info(st.session_state.mood_entry_status)
+
+elif st.session_state.active_tool == "thought_reframing":
+    render_thought_reframing()
+
+elif st.session_state.active_tool == "sleep_hygiene":
+    render_sleep_hygiene_toolkit()
+
+elif st.session_state.active_tool == "medication_reminder":
+    render_medication_reminder()
+
+elif st.session_state.active_tool == "self_compassion":
+    render_self_compassion_tool()
 
 elif st.session_state.active_tool == "knowledge":
     st.header("📚 Resources & Knowledge Base")
