@@ -2,13 +2,8 @@ import streamlit as st
 import base64
 import pandas as pd
 import os
+import joblib
 from collections import Counter
-from sklearn.preprocessing import LabelEncoder
-from sklearn import tree, svm
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
 
 def get_base64_of_bin_file(image_path):
     with open(image_path, "rb") as f:
@@ -160,41 +155,51 @@ st.markdown("""
 
 # Get base path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(os.path.dirname(BASE_DIR), 'models')
 
-# Load datasets
-dis_sym_data = pd.read_csv(os.path.join(BASE_DIR, "Original_Dataset.csv"))
-doc_data = pd.read_csv(os.path.join(BASE_DIR, "Doctor_Versus_Disease.csv"), encoding='latin1', names=['Disease', 'Specialist'])
-des_data = pd.read_csv(os.path.join(BASE_DIR, "Disease_Description.csv"))
+@st.cache_data
+def load_datasets():
+    """Load and cache all CSV datasets."""
+    doc_data = pd.read_csv(os.path.join(BASE_DIR, "Doctor_Versus_Disease.csv"), 
+                           encoding='latin1', names=['Disease', 'Specialist'])
+    des_data = pd.read_csv(os.path.join(BASE_DIR, "Disease_Description.csv"))
+    return doc_data, des_data
 
-# Prepare symptom columns
-columns_to_check = [col for col in dis_sym_data.columns if col != 'Disease']
-symptoms_list = list(set(dis_sym_data.iloc[:, 1:].values.flatten()))
-symptoms_list = [s for s in symptoms_list if pd.notna(s)]
+@st.cache_data
+def load_symptoms_list():
+    """Load and process the symptoms list from the dataset."""
+    dis_sym_data = pd.read_csv(os.path.join(BASE_DIR, "Original_Dataset.csv"))
+    symptoms_list = list(set(dis_sym_data.iloc[:, 1:].values.flatten()))
+    symptoms_list = [s for s in symptoms_list if pd.notna(s)]
+    return symptoms_list
 
-for symptom in symptoms_list:
-    dis_sym_data[symptom] = dis_sym_data.iloc[:, 1:].apply(lambda row: int(symptom in row.values), axis=1)
+@st.cache_resource
+def load_models():
+    """Load pre-trained models and label encoder from disk."""
+    models = {}
+    model_files = {
+        'Logistic Regression': 'logistic_regression.joblib',
+        'Decision Tree': 'decision_tree.joblib',
+        'Random Forest': 'random_forest.joblib',
+        'SVM': 'svm.joblib',
+        'NaiveBayes': 'naive_bayes.joblib',
+        'K-Nearest Neighbors': 'knn.joblib',
+    }
+    
+    for model_name, model_file in model_files.items():
+        model_path = os.path.join(MODELS_DIR, model_file)
+        models[model_name] = joblib.load(model_path)
+    
+    # Load label encoder and feature columns
+    le = joblib.load(os.path.join(MODELS_DIR, 'label_encoder.joblib'))
+    feature_columns = joblib.load(os.path.join(MODELS_DIR, 'feature_columns.joblib'))
+    
+    return models, le, feature_columns
 
-dis_sym_data_v1 = dis_sym_data.drop(columns=columns_to_check)
-dis_sym_data_v1 = dis_sym_data_v1.loc[:, dis_sym_data_v1.columns.notna()]
-dis_sym_data_v1.columns = dis_sym_data_v1.columns.str.strip()
-
-# Encode labels
-le = LabelEncoder()
-dis_sym_data_v1['Disease'] = le.fit_transform(dis_sym_data_v1['Disease'])
-X = dis_sym_data_v1.drop(columns="Disease")
-y = dis_sym_data_v1['Disease']
-
-# Train models
-algorithms = {
-    'Logistic Regression': LogisticRegression(),
-    'Decision Tree': tree.DecisionTreeClassifier(),
-    'Random Forest': RandomForestClassifier(),
-    'SVM': svm.SVC(probability=True),
-    'NaiveBayes': GaussianNB(),
-    'K-Nearest Neighbors': KNeighborsClassifier(),
-}
-for model in algorithms.values():
-    model.fit(X, y)
+# Load cached data and models
+doc_data, des_data = load_datasets()
+symptoms_list = load_symptoms_list()
+algorithms, le, X_columns = load_models()
 
 # Sidebar
 st.sidebar.header("🛠️ Input Options")
@@ -314,7 +319,7 @@ if st.sidebar.button("🔎 Predict Disease"):
         st.warning("⚠️ Please select at least one symptom!")
     else:
         with st.spinner("⏳ Analyzing symptoms and predicting..."):
-            test_data = {col: 1 if col in selected_symptoms else 0 for col in X.columns}
+            test_data = {col: 1 if col in selected_symptoms else 0 for col in X_columns}
             test_df = pd.DataFrame(test_data, index=[0])
 
             predicted = []

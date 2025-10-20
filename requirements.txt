@@ -17,6 +17,7 @@ pygame
 streamlit-modal
 streamlit_js_eval
 scikit-learn
+joblib
 pandas
 numpy
 python-dotenv

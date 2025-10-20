@@ -1,5 +1,4 @@
 import os
-import os
 import streamlit as st
 import json
 import base64
@@ -10,7 +9,17 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import JsonOutputParser
 from typing import List
 
-st.set_page_config(page_title="🧘 Yoga for Mental Health", layout="centered")
+st.set_page_config(
+    page_title="Yoga for Mental Health",
+    page_icon="assets/yoga_icon.svg", 
+    layout="centered"
+)
+
+# Read SVG content
+with open("assets/yoga_icon.svg", "r") as file:
+    svg_content = file.read()
+
+
 
 def load_lottiefile(filepath: str):
     try:
@@ -52,14 +61,7 @@ selected_palette = st.session_state.get("palette_name", "Pink").lower()
 if is_dark:
     background_image_path = "static_files/dark.png"
 else:
-    palette_color = {
-        "light": "static_files/pink.png",
-        "calm blue": "static_files/blue.png",
-        "mint": "static_files/mint.png",
-        "lavender": "static_files/lavender.png",
-        "pink": "static_files/pink.png"
-    }
-    background_image_path = palette_color.get(selected_palette, "static_files/pink.png") # Pick corresponding background file; default to pink if not found
+    background_image_path = "static_files/yoga-bg.png"
 
 base64_background_image = get_base64_of_bin_file(background_image_path)
 
@@ -126,6 +128,19 @@ div[data-testid="stVerticalBlock"]:has(div.stTextArea)
     border: 1px solid rgba(255, 255, 255, 0.8);
 }}
 
+.green-header {{
+    text-align: center;
+    font-weight: bold;
+    margin: 10px 0 5px 0;
+}}
+
+.description {{
+    text-align: start;
+    font-size: 16px;
+    font-weight: bold;
+    color: #155724;
+    margin-top: 0px;
+}}
 [data-testid="stSidebar"] {{
     background-color: rgba(253, 208, 232, 0.4) !important;
     border-right: 2px solid rgba(245, 167, 208, 0.6) !important;
@@ -150,26 +165,91 @@ div[style*="rgba(245"], div[style*="#f5"], div[style*="rgb(245"] {{
     box-shadow: none !important;
     visibility: hidden !important;
 }}
-
+div svg {{
+    width: 20px !important;
+    height: 20px !important;
+}}
 .block-container {{
+    max-width: 1000px !important; 
     padding-top: 2rem !important; 
     padding-left: 2rem !important;
     padding-right: 2rem !important;
     margin-top: 0rem !important;
 }}
 
-.lottie-container {{
-    margin-top: -20px;
-    margin-bottom: -10px;
-    padding: 15px;
-    border-radius: 12px;
-    background-color: rgba(252, 213, 236, 0.7);
+.white-header-tube {{
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 20px 20px 0px 0px;
+    padding: 0px 10px;
     display: flex;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    align-items: center;
+    justify-content: start;
+    gap: 12px;
+    width: full;
+    height: 3rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    border: 1px solid rgba(200, 200, 200, 0.4);
     backdrop-filter: blur(8px);
 }}
+.white-header-big-circle {{
+    width: 28px;                
+    height: 28px;
+    border-radius: 50%;
+    background-color: #c8e6c9; 
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}}
+
+.white-header-circle {{
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #193E20;
+}}
+
+.white-header-text {{
+    color: #193E20 !important;
+    font-size: 20px !important;
+    font-weight: 600;
+    display: flex;
+    gap: 8px;
+}}
+
+/* Label (the "How are you feeling today?" text) */
+div[data-testid="stTextArea"] label {{
+    font-size: 18px !important;  /* bigger font */
+    font-weight: 600 !important;
+    color: #4a148c !important;   /* purple accent */
+    margin-bottom: 5px !important;
+}}
+
+/* Text area */
+div[data-testid="stTextArea"] textarea {{
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+    border: 1px solid rgba(200, 200, 200, 0.5) !important;
+    color: #333 !important;
+    font-size: 16px !important;
+    width: 100% !important;
+    resize: vertical !important;
+}}
+
+/* Placeholder */
+div[data-testid="stTextArea"] textarea::placeholder {{
+    color: rgba(100,100,100,0.6) !important;
+    font-style: italic;
+    font-size: 15px !important;
+}}
+
+/* Focus */
+div[data-testid="stTextArea"] textarea:focus {{
+    outline: none !important;
+    border: 1.5px solid #4a148c !important;
+    box-shadow: 0 0 8px rgba(74, 20, 140, 0.2);
+}}
+
 
 div[data-testid="stSelectbox"] * {{
     cursor: pointer !important;
@@ -256,25 +336,31 @@ button[data-testid="stExpanderToggle"]:hover {{
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }}
 
+/* Button */
 div[data-testid="stButton"] > button {{
-    background: linear-gradient(to bottom, #ffffff, #f0f0f0);
-    color: rgba(49, 51, 63, 0.8) !important; 
-    border: 1px solid #cccccc !important; 
+    background-color: #1b5e20 !important; /* dark green */
+    border: 1px solid #145214 !important; 
     border-radius: 12px !important;
     font-weight: bold !important;
+    color: #ffffff !important; /* fallback */
     padding: 10px 20px !important;
-    box-shadow: 
-        0 4px 10px rgba(0, 0, 0, 0.1), 
-        inset 0 1px 0 rgba(255, 255, 255, 0.6); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.2s ease;
 }}
 
+/* Hover */
 div[data-testid="stButton"] > button:hover {{
-    background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
-    box-shadow: 
-        0 2px 5px rgba(0, 0, 0, 0.1), 
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background-color: #145214 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    color: #ffffff !important;
 }}
+
+/*  text inside (all inner spans/divs) */
+div[data-testid="stButton"] > button * {{
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}}
+
 
 p, li, strong, div {{
     color: #333 !important;
@@ -283,6 +369,15 @@ p, li, strong, div {{
 
 </style>
 """, unsafe_allow_html=True)
+# Dummy classes to bypass LangChain backend for frontend edits
+try:
+    from langchain_core.pydantic_v1 import BaseModel, Field
+except ModuleNotFoundError:
+    class BaseModel:
+        pass
+    def Field(*args, **kwargs):
+        return None
+
 class YogaAsana(BaseModel):
     sanskrit_name: str = Field(description="The Sanskrit name of the yoga pose.")
     english_name: str = Field(description="The English name of the yoga pose.")
@@ -348,25 +443,22 @@ def classify_intent(user_input):
     else:
         return "other"
 
-st.markdown('<div class="lottie-container">', unsafe_allow_html=True)
-if lottie_yoga:
-    st_lottie(lottie_yoga, height=220, key="yoga")
-st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<h1 style="
-  text-align: center;
-  background: linear-gradient(90deg, #b833a2, #ff69b4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-  margin-top: -15px;
-">
-🧘 Yoga for Mental Wellness
-</h1>
+# Header 
+st.markdown(f"""
+<div class="white-header-tube">
+    <div class="white-header-big-circle"><div class="white-header-circle"></div></div>
+    <h1 class="white-header-text"> Yoga for Mental Wellness</h1>
+</div>
 """, unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; font-size: 17px;'>Tell me how you're feeling, and I'll suggest few calming yoga poses.</p>", unsafe_allow_html=True)
+# Lottie animation
+if lottie_yoga:
+        st_lottie(lottie_yoga, height=280, key="yoga")
+
+# Description
+st.markdown('<p class="description">Tell me how you\'re feeling, and I\'ll suggest a few calming yoga poses.</p>', unsafe_allow_html=True)
+
 
 user_mood_input = st.text_area("How are you feeling today?", height=100, placeholder="e.g., I'm feeling really stressed and overwhelmed with work.", key="mood_input")
 
