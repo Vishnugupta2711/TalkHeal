@@ -139,21 +139,102 @@ def calculate_weekly_minutes(log):
 
 # --- UI VIEWS ---
 def show_setup_view():
-    st.markdown("<h1 style='text-align: center; color: teal;'>🧘 Breathing Exercise</h2>", unsafe_allow_html=True)
-    st.markdown("Use this guided exercise to relax. Select a technique, then start your session.")
+    # --- Inject custom CSS for layout and metrics ---
+    st.markdown("""
+    <style>
+    .breathing-container {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, #e6f0ff 0%, #fff 100%);
+        border-radius: 18px;
+        margin-bottom: 2rem;
+    }
 
+    .breathing-container h1 {
+        color: #0f766e;
+        font-family: 'Baloo 2', cursive;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .breathing-container p {
+        color: #333;
+        font-size: 1.2rem;
+        font-style: italic;
+    }
+
+    .metric-card {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+    }
+
+    .metric-card h3 {
+        margin-bottom: 0.5rem;
+        color: #2563eb;
+        font-size: 1.1rem;
+    }
+
+    .metric-card p {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #31333F;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # --- Header Section ---
+    with st.container():
+        st.markdown("""
+        <div class="breathing-container">
+            <h1>🧘 Breathing Exercise</h1>
+            <p>Use this guided exercise to relax. Select a technique, then start your session.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # --- Progress Section ---
     st.markdown("### 📊 Your Progress")
-    col1, col2 = st.columns(2)
-    col1.metric("Current Streak", f"{calculate_streak(st.session_state.session_log)} Days 🔥")
-    col2.metric("This Week's Total", f"{calculate_weekly_minutes(st.session_state.session_log)} Mins")
-    st.markdown("--- ")
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown(f"""
+            <div class="metric-card">
+                <h3>Current Streak</h3>
+                <p>{calculate_streak(st.session_state.session_log)} Days 🔥</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+            <div class="metric-card">
+                <h3>This Week's Total</h3>
+                <p>{calculate_weekly_minutes(st.session_state.session_log)} Mins</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # --- Session Setup Controls ---
     st.markdown("### ⚙️ Session Setup")
-    st.session_state.breathing_technique = st.selectbox("Choose a Breathing Technique:", options=list(TECHNIQUES.keys()))
-    
-    st.session_state.mood_before = st.slider("First, rate your current stress level (1=Low, 10=High):", 1, 10, 5)
-    st.session_state.session_minutes = st.slider("How many minutes do you want to practice?", 1, 15, 2)
-    
+
+    st.session_state.breathing_technique = st.selectbox(
+        "Choose a Breathing Technique:", 
+        options=list(TECHNIQUES.keys())
+    )
+
+    st.session_state.mood_before = st.slider(
+        "Rate your current stress level (1 = Low, 10 = High):", 
+        1, 10, 5
+    )
+
+    st.session_state.session_minutes = st.slider(
+        "How many minutes do you want to practice?", 
+        1, 15, 2
+    )
+
     if st.button("Start Session"):
         st.session_state.page_state = 'RUNNING'
         st.rerun()
@@ -216,6 +297,9 @@ def show_summary_view():
 # --- Main App Logic ---
 initialize_state()
 
-if st.session_state.page_state == 'SETUP': show_setup_view()
-elif st.session_state.page_state == 'RUNNING': run_session_view()
-elif st.session_state.page_state == 'SUMMARY': show_summary_view()
+if st.session_state.page_state == 'SETUP':
+    show_setup_view()
+elif st.session_state.page_state == 'RUNNING':
+    run_session_view()
+elif st.session_state.page_state == 'SUMMARY':
+    show_summary_view()
