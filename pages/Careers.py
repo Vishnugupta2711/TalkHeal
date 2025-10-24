@@ -405,8 +405,30 @@ def show():
         submitted = st.form_submit_button("Submit Application")
 
         if submitted:
-            if name and email and position and resume:
-                # Save application data
+            # Validation
+            def is_valid_email(email):
+                return re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email) is not None
+            
+            errors = []
+            
+            if not name:
+                errors.append("Full Name is required")
+            if not email:
+                errors.append("Email Address is required")
+            elif not is_valid_email(email):
+                errors.append("Please enter a valid email address")
+            if not position:
+                errors.append("Position is required")
+            if not resume:
+                errors.append("Resume is required")
+            if not consent:
+                errors.append("You must agree to data processing to continue")
+            
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                # Create a directory for applications if it doesn't exist
                 if not os.path.exists("data/applications"):
                     os.makedirs("data/applications")
 
@@ -479,11 +501,8 @@ show()
 
                     f.write(f"Cover Letter:\n{cover_letter}")
 
-                st.success("🎉 Your application has been submitted successfully!")
-            else:
-                st.error("⚠️ Please complete all required fields.")
+show()
 
-    st.markdown("</div>", unsafe_allow_html=True) 
 
     st.info("More roles and opportunities coming soon!")
     
